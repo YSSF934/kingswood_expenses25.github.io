@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 400px; margin: auto; padding: 20px; }
+        h1 { text-align: center; }
+        input[type="text"], input[type="number"] { width: 100%; padding: 10px; margin: 5px 0; }
+        button { width: 100%; padding: 10px; background-color: #28a745; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #218838; }
+        ul { list-style-type: none; padding: 0; }
+        li { display: flex; justify-content: space-between; margin: 5px 0; }
+    </style>
+</head>
+<body>
+
+    <h1>Expense Tracker</h1>
+
+    <!-- Form for adding expenses -->
+    <input type="text" id="expenseName" placeholder="Expense Name">
+    <input type="number" id="expenseAmount" placeholder="Amount">
+    <button onclick="addExpense()">Add Expense</button>
+
+    <!-- Display total expenses -->
+    <h2>Total: $<span id="totalAmount">0</span></h2>
+
+    <!-- List of expenses -->
+    <ul id="expenseList"></ul>
+
+    <script>
+        let totalAmount = 0;
+        let expenses = [];
+
+        // Function to add a new expense
+        function addExpense() {
+            const name = document.getElementById("expenseName").value;
+            const amount = parseFloat(document.getElementById("expenseAmount").value);
+
+            // Validate input
+            if (name === "" || isNaN(amount) || amount <= 0) {
+                alert("Please enter a valid name and amount.");
+                return;
+            }
+
+            // Add the expense to the list
+            expenses.push({ name, amount });
+            totalAmount += amount;
+
+            // Update the display
+            document.getElementById("totalAmount").textContent = totalAmount.toFixed(2);
+            renderExpenses();
+
+            // Clear input fields
+            document.getElementById("expenseName").value = "";
+            document.getElementById("expenseAmount").value = "";
+        }
+
+        // Function to render the list of expenses
+        function renderExpenses() {
+            const expenseList = document.getElementById("expenseList");
+            expenseList.innerHTML = "";
+
+            expenses.forEach((expense, index) => {
+                const listItem = document.createElement("li");
+                listItem.textContent = `${expense.name}: $${expense.amount.toFixed(2)}`;
+                
+                // Create a delete button for each expense
+                const deleteButton = document.createElement("button");
+                deleteButton.textContent = "Remove";
+                deleteButton.style.marginLeft = "10px";
+                deleteButton.style.color = "white";
+                deleteButton.style.backgroundColor = "#dc3545";
+                deleteButton.style.border = "none";
+                deleteButton.style.cursor = "pointer";
+                
+                // Add event listener to delete button
+                deleteButton.onclick = () => removeExpense(index);
+
+                listItem.appendChild(deleteButton);
+                expenseList.appendChild(listItem);
+            });
+        }
+
+        // Function to remove an expense
+        function removeExpense(index) {
+            const amount = expenses[index].amount;
+            totalAmount -= amount;
+            expenses.splice(index, 1);
+
+            // Update the display
+            document.getElementById("totalAmount").textContent = totalAmount.toFixed(2);
+            renderExpenses();
+        }
+    </script>
+
+</body>
+</html>
