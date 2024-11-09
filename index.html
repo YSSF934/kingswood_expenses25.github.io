@@ -5,29 +5,117 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expense Tracker</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 400px; margin: auto; padding: 20px; }
-        h1 { text-align: center; }
-        input[type="text"], input[type="number"] { width: 100%; padding: 10px; margin: 5px 0; }
-        button { width: 100%; padding: 10px; background-color: #28a745; color: white; border: none; cursor: pointer; }
-        button:hover { background-color: #218838; }
-        ul { list-style-type: none; padding: 0; }
-        li { display: flex; justify-content: space-between; margin: 5px 0; }
+        /* Basic styling */
+        body { 
+            font-family: Arial, sans-serif; 
+            background-color: #f4f4f9; 
+            color: #333; 
+            display: flex; 
+            justify-content: center; 
+            padding: 20px;
+        }
+        .container {
+            max-width: 500px;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            margin-top: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #4a90e2;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        button {
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #357abd;
+        }
+        .total-display {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #4a90e2;
+            color: white;
+        }
+        .delete-button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            padding: 8px;
+            font-size: 0.9em;
+        }
+        .delete-button:hover {
+            background-color: #c0392b;
+        }
     </style>
 </head>
 <body>
 
-    <h1>Expense Tracker</h1>
+    <div class="container">
+        <h1>Camp Kingswood Expense Tracker</h1>
+        
+        <!-- Form for adding expenses -->
+        <input type="text" id="expenseName" placeholder="Expense Name" required>
+        <input type="date" id="expenseDate" required>
+        <input type="number" id="expenseAmount" placeholder="Amount" required>
+        
+        <select id="expenseCategory">
+            <option value="Supplies">Supplies</option>
+            <option value="Activities">Activities</option>
+            <option value="Food">Food</option>
+        </select>
+        
+        <button onclick="addExpense()">Add Expense</button>
 
-    <!-- Form for adding expenses -->
-    <input type="text" id="expenseName" placeholder="Expense Name">
-    <input type="number" id="expenseAmount" placeholder="Amount">
-    <button onclick="addExpense()">Add Expense</button>
+        <!-- Display total expenses -->
+        <div class="total-display">Total: $<span id="totalAmount">0</span></div>
 
-    <!-- Display total expenses -->
-    <h2>Total: $<span id="totalAmount">0</span></h2>
-
-    <!-- List of expenses -->
-    <ul id="expenseList"></ul>
+        <!-- Table for displaying expenses -->
+        <table id="expenseTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Category</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="expenseTableBody"></tbody>
+        </table>
+    </div>
 
     <script>
         let totalAmount = 0;
@@ -36,16 +124,19 @@
         // Function to add a new expense
         function addExpense() {
             const name = document.getElementById("expenseName").value;
+            const date = document.getElementById("expenseDate").value;
             const amount = parseFloat(document.getElementById("expenseAmount").value);
+            const category = document.getElementById("expenseCategory").value;
 
             // Validate input
-            if (name === "" || isNaN(amount) || amount <= 0) {
-                alert("Please enter a valid name and amount.");
+            if (!name || !date || isNaN(amount) || amount <= 0) {
+                alert("Please enter valid name, date, and amount.");
                 return;
             }
 
             // Add the expense to the list
-            expenses.push({ name, amount });
+            const expense = { name, date, amount, category };
+            expenses.push(expense);
             totalAmount += amount;
 
             // Update the display
@@ -54,37 +145,33 @@
 
             // Clear input fields
             document.getElementById("expenseName").value = "";
+            document.getElementById("expenseDate").value = "";
             document.getElementById("expenseAmount").value = "";
+            document.getElementById("expenseCategory").value = "Supplies";
         }
 
-        // Function to render the list of expenses
+        // Function to render the list of expenses in the table
         function renderExpenses() {
-            const expenseList = document.getElementById("expenseList");
-            expenseList.innerHTML = "";
+            const expenseTableBody = document.getElementById("expenseTableBody");
+            expenseTableBody.innerHTML = "";
 
             expenses.forEach((expense, index) => {
-                const listItem = document.createElement("li");
-                listItem.textContent = `${expense.name}: $${expense.amount.toFixed(2)}`;
-                
-                // Create a delete button for each expense
-                const deleteButton = document.createElement("button");
-                deleteButton.textContent = "Remove";
-                deleteButton.style.marginLeft = "10px";
-                deleteButton.style.color = "white";
-                deleteButton.style.backgroundColor = "#dc3545";
-                deleteButton.style.border = "none";
-                deleteButton.style.cursor = "pointer";
-                
-                // Add event listener to delete button
-                deleteButton.onclick = () => removeExpense(index);
+                const row = document.createElement("tr");
 
-                listItem.appendChild(deleteButton);
-                expenseList.appendChild(listItem);
+                row.innerHTML = `
+                    <td>${expense.name}</td>
+                    <td>${expense.date}</td>
+                    <td>$${expense.amount.toFixed(2)}</td>
+                    <td>${expense.category}</td>
+                    <td><button class="delete-button" onclick="deleteExpense(${index})">Delete</button></td>
+                `;
+
+                expenseTableBody.appendChild(row);
             });
         }
 
-        // Function to remove an expense
-        function removeExpense(index) {
+        // Function to delete an expense
+        function deleteExpense(index) {
             const amount = expenses[index].amount;
             totalAmount -= amount;
             expenses.splice(index, 1);
